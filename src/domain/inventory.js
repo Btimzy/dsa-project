@@ -238,3 +238,71 @@ export function offerNextOnWaitlist(store, tierId) {
   }
   return queue.dequeue();
 }
+
+export function publishEvent(store, eventId) {
+  requireStore(store);
+  requireText(eventId, 'Event ID');
+  const event = store.events.get(eventId);
+  if (!event) throw new DomainError('NOT_FOUND', 'Event not found');
+
+  if (!Array.isArray(event.tierIds) || event.tierIds.length === 0) {
+    throw new DomainError('INVALID_STATE', 'Cannot publish an event with no ticket tiers');
+  }
+
+  event.status = 'published';
+  return event;
+}
+
+export function unpublishEvent(store, eventId) {
+  requireStore(store);
+  requireText(eventId, 'Event ID');
+  const event = store.events.get(eventId);
+  if (!event) throw new DomainError('NOT_FOUND', 'Event not found');
+
+  event.status = 'draft';
+  return event;
+}
+
+export function listEventSummaries(store, { publishedOnly = true } = {}) {
+  requireStore(store);
+  const summaries = [];
+
+  for (const event of store.events.values()) {
+    if (publishedOnly && event.status !== 'published') {
+      continue;
+    }
+
+    let minPriceCents = null;
+    let totalCapacity = 0;
+    let totalSold = 0;
+
+    for (const tierId of event.tierIds) {
+      const tier = store.tiers.get(tierId);
+      if (tier) {
+        if (minPriceCents === null || tier.priceCents < minPriceCents) {
+          minPriceCents = tier.priceCents;
+        }
+        totalCapacity += tier.capacity;
+        totalSold += tier.sold;
+      }
+    }
+
+    summaries.push({
+      id: event.id,
+      organizerId: event.organizerId,
+      title: event.title,
+      city: event.city,
+      venue: event.venue,
+      startsAt: event.startsAt,
+      status: event.status,
+      tierCount: event.tierIds.length,
+      minPriceCents,
+      seatsLeft: totalCapacity - totalSold,
+      totalCapacity,
+      totalSold,
+    });
+  }
+
+  return summaries;
+}
+
