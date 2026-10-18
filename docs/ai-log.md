@@ -3,6 +3,13 @@
 Every time you give an AI tool a significant prompt, add an entry. Three lines each.
 "Nothing was wrong" is allowed, but it is rarely true. Your instructor will read this.
 
+## Build 2
+
+### Prompt 1: Build 2 prompt (docs/build-2.md)
+- **What I asked:** Implement `sorting.js` with a custom stable `mergeSort` (without `Array.prototype.sort`), `publishEvent`, `unpublishEvent`, and `listEventSummaries` in `inventory.js`, pure functions (`filterEvents`, `sortEvents`, `searchEvents`) in `eventSearch.js`, automated tests for S02, S03, S04, S05, S06 with `node:test`, and `npm test` script in `package.json`.
+- **What came back:** All domain modules and pure search/sort functions were implemented alongside 27 passing automated tests covering all acceptance criteria, error codes, merge sort stability, and immutability.
+- **What was wrong (or "nothing"):** Ensure date-only boundary parsing for "to" parameters extends through the end of the specified day (`23:59:59.999Z`) so evening events on that date are matched; ensure merge sort uses `<= 0` to preserve strict stability for equal items.
+
 ## Build 1
 
 ### Prompt 1: Build 1 domain core (terminal)
