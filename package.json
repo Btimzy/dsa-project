@@ -8,6 +8,7 @@
     "node": ">=22.13"
   },
   "scripts": {
+    "start": "node src/server.js",
     "test": "node --test",
     "demo": "node scripts/demo.js",
     "benchmark": "node scripts/benchmark-lookup.js"
