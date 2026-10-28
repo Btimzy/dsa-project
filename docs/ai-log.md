@@ -3,6 +3,13 @@
 Every time you give an AI tool a significant prompt, add an entry. Three lines each.
 "Nothing was wrong" is allowed, but it is rarely true. Your instructor will read this.
 
+## Build 3
+
+### Prompt 1: Build 3 prompt (docs/build-3.md)
+- **What I asked:** Create `docs/architecture.md` with three Mermaid diagrams (layers, data model, booking life cycle) and layer rules, `bookingStateMachine.js` with allowed and terminal transitions and `INVALID_TRANSITION` error code, a tiny router (`router.js`), an HTTP server (`app.js`, `server.js`, `config.js`) answering `GET /health`, serving `public/` files with path escape protection, uniform error shape `{"error":{"code","message"}}`, and test suite in `node:test`.
+- **What came back:** Architecture document with 3 valid Mermaid diagrams, state machine implementation with invariant validation, HTTP router with parameter parsing, node:http server with static file containment and uniform error handling, and test suite covering all transitions, routing, and real HTTP calls.
+- **What was wrong (or "nothing"):** Ensure that path traversal attempts with encoded or dot-dot characters are strictly contained within `public/` using `path.resolve` boundary verification, and ensure stack traces never leak in 500 error responses.
+
 ## Build 2
 
 ### Prompt 1: Build 2 prompt (docs/build-2.md)
