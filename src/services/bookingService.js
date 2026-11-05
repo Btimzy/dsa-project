@@ -61,6 +61,17 @@ export class BookingService {
       throw new DomainError('VALIDATION', 'Booking amount exceeds supported whole-cent range');
     }
 
+    // Atomic seat reservation if repository supports it (Build 5 overselling fix)
+    if (typeof this.#repo.reserveSeats === 'function' && this.#repo.useAtomicReservation !== false) {
+      const wonSeat = await this.#repo.reserveSeats(tier.id, quantity);
+      if (!wonSeat) {
+        throw new DomainError('SOLD_OUT', `${tier.name} is sold out`, { seatsLeft: 0 });
+      }
+    } else {
+      // Non-atomic read-then-write fallback (reproduces overselling under concurrency)
+      await this.#repo.updateTier(tier.id, { sold: tier.sold + quantity });
+    }
+
     let reference;
     do {
       reference = newReference();
@@ -79,7 +90,6 @@ export class BookingService {
     };
 
     await this.#repo.createBooking(booking);
-    await this.#repo.updateTier(tier.id, { sold: tier.sold + quantity });
 
     return booking;
   }
@@ -145,10 +155,15 @@ export class BookingService {
     // State machine transition check
     assertTransition(booking.status, BOOKING_STATES.CANCELLED);
 
-    const tier = await this.#repo.findTierById(booking.tierId);
-    if (tier) {
-      const updatedSold = Math.max(0, tier.sold - booking.quantity);
-      await this.#repo.updateTier(tier.id, { sold: updatedSold });
+    // Release seats
+    if (typeof this.#repo.releaseSeats === 'function' && this.#repo.useAtomicReservation !== false) {
+      await this.#repo.releaseSeats(booking.tierId, booking.quantity);
+    } else {
+      const tier = await this.#repo.findTierById(booking.tierId);
+      if (tier) {
+        const updatedSold = Math.max(0, tier.sold - booking.quantity);
+        await this.#repo.updateTier(tier.id, { sold: updatedSold });
+      }
     }
 
     const updatedBooking = await this.#repo.updateBooking(booking.id, {

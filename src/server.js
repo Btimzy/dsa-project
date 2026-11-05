@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url';
 import { createApp } from './http/app.js';
 import { createRouter } from './http/router.js';
 import { registerRoutes } from './http/routes.js';
-import { createMemoryRepository } from './repositories/memory.js';
+import { createSqliteRepository } from './repositories/sqlite.js';
 import { createMockPaymentGateway } from './lib/mockPaymentGateway.js';
 import { createEventService } from './services/eventService.js';
 import { createBookingService } from './services/bookingService.js';
@@ -11,7 +11,7 @@ import { config } from './config.js';
 
 export function buildServer(options = {}) {
   const router = createRouter();
-  const repo = options.repo || createMemoryRepository();
+  const repo = options.repo || createSqliteRepository();
   const paymentGateway = options.paymentGateway || createMockPaymentGateway();
 
   const eventService = createEventService(repo);
