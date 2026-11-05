@@ -3,6 +3,18 @@
 Every time you give an AI tool a significant prompt, add an entry. Three lines each.
 "Nothing was wrong" is allowed, but it is rarely true. Your instructor will read this.
 
+## Build 5
+
+### Prompt 1: Move to SQLite and reproduce overselling
+- **What I asked:** Create `src/db/schema.sql` and `src/db/connection.js` with tables for users, events, ticket_tiers, and bookings with constraints (`CHECK (sold >= 0 AND sold <= capacity)`), `src/repositories/sqlite.js` matching `memory.js` methods with parameterized queries, `scripts/seed.js`, and `scripts/oversell-demo.js` firing 50 simultaneous booking requests at 1 remaining seat to reproduce overselling.
+- **What came back:** Full SQLite database setup using built-in `node:sqlite`, schema migrations, seeded sample data script, and demonstration script reproducing 50 simultaneous bookings succeeding for 1 available seat.
+- **What was wrong (or "nothing"):** Ensure database directory is automatically created if it does not exist before connecting, and ensure foreign keys and WAL mode are enabled on every connection via `PRAGMA foreign_keys = ON; PRAGMA journal_mode = WAL;`.
+
+### Prompt 2: Database atomic reservation fix
+- **What I asked:** Fix the overselling problem in the database using an atomic statement (`UPDATE ticket_tiers SET sold = sold + ? WHERE id = ? AND sold + ? <= capacity`) checking changed rows to throw `SOLD_OUT`, explain why lock variables and checking twice fail, add `test/oversell.test.js` verifying 1 success and 49 `SOLD_OUT` plus a negative test proving failure if the fix is removed, and update the demo script to show numbers before and after.
+- **What came back:** Atomic reservation statement implemented in `sqlite.js` and wired to `bookingService.js`, `test/oversell.test.js` verifying 50 simultaneous requests result in exactly 1 booking and 49 `SOLD_OUT` plus data persistence across restart, and dual-mode oversell demo script.
+- **What was wrong (or "nothing"):** Make sure seat release on cancellation also protects the lower bound (`sold = MAX(0, sold - ?)`) so concurrent cancellations cannot violate check constraints.
+
 ## Build 4
 
 ### Prompt 1: Build 4 REST API (in memory)
