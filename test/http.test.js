@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import http from 'node:http';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { createRouter } from '../src/http/router.js';
 import { createApp, sendJson } from '../src/http/app.js';
 import { DomainError } from '../src/domain/errors.js';
@@ -144,7 +145,7 @@ test('HTTP server - malformed JSON payload returns 400 with standard error shape
 
 test('HTTP server - serves static files from public/ and blocks directory traversal', async () => {
   const router = createRouter();
-  const publicDir = path.resolve(process.cwd(), 'public');
+  const publicDir = fileURLToPath(new URL('../public', import.meta.url));
   const server = createApp({ router, publicDir });
 
   await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));

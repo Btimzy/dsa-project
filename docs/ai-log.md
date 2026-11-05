@@ -3,6 +3,13 @@
 Every time you give an AI tool a significant prompt, add an entry. Three lines each.
 "Nothing was wrong" is allowed, but it is rarely true. Your instructor will read this.
 
+## Build 4
+
+### Prompt 1: Build 4 REST API (in memory)
+- **What I asked:** Implement in-memory data repositories (`memory.js`), domain services (`eventService.js`, `bookingService.js`), mock payment gateway (`mockPaymentGateway.js`), REST routes with `x-user-id` header authentication and uniform error response format, API examples in `docs/api-examples.md`, and integration tests in `test/api.test.js`.
+- **What came back:** Full working REST API with decoupled repository and services, simulation of mock card payment and declines without storing card numbers, comprehensive curl examples in `docs/api-examples.md`, and 8 end-to-end API tests.
+- **What was wrong (or "nothing"):** Ensure `src/server.js` only listens on port 3000 when executed as CLI entry point rather than when imported by test suites to prevent dangling open ports; ensure static public directory resolution uses `import.meta.url` rather than `process.cwd()` to run reliably regardless of invocation directory.
+
 ## Build 3
 
 ### Prompt 1: Build 3 prompt (docs/build-3.md)

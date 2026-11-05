@@ -4,6 +4,7 @@
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { DomainError } from '../domain/errors.js';
 import { createRouter } from './router.js';
 
@@ -19,6 +20,8 @@ const MIME_TYPES = {
   '.txt': 'text/plain; charset=utf-8',
   '.ico': 'image/x-icon',
 };
+
+const DEFAULT_PUBLIC_DIR = fileURLToPath(new URL('../../public', import.meta.url));
 
 export function sendJson(res, statusCode, data) {
   const json = JSON.stringify(data);
@@ -42,8 +45,14 @@ function mapDomainErrorCodeToStatus(code) {
   switch (code) {
     case 'VALIDATION':
       return 400;
+    case 'UNAUTHORIZED':
+      return 401;
+    case 'FORBIDDEN':
+      return 403;
     case 'NOT_FOUND':
       return 404;
+    case 'PAYMENT_DECLINED':
+      return 402;
     case 'SOLD_OUT':
     case 'NOT_SOLD_OUT':
     case 'INVALID_STATE':
@@ -79,12 +88,13 @@ async function readRequestBody(req) {
   }
 }
 
-export function createRequestHandler({ router = createRouter(), publicDir = path.resolve(process.cwd(), 'public') } = {}) {
+export function createRequestHandler({ router = createRouter(), publicDir = DEFAULT_PUBLIC_DIR } = {}) {
   const resolvedPublicDir = path.resolve(publicDir);
 
   return async function requestHandler(req, res) {
     const parsedUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
     const pathname = parsedUrl.pathname;
+    req.query = Object.fromEntries(parsedUrl.searchParams.entries());
 
     // 1. Health check endpoint
     if (req.method === 'GET' && pathname === '/health') {
